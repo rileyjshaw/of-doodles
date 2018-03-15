@@ -21,5 +21,15 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+        ofPoint generateOffset(float maxAmplitude);
         int seed;
+        int nRows;
+        int nCols;
+        int squareSize;
+        int squarePad;
+        float baseOffsetMagnitude;
+        float topPad;
+        bool isTweaking;
+        float originOffsetPower;
+        float pointOffsetPower;
 };

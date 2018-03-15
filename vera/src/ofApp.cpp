@@ -1,16 +1,18 @@
 #include "ofApp.h"
 
-int nRows = 6;
-int nCols = 23;
-int squareSize = 35;
-int squarePad = 7;
-float baseOffset = squarePad * 1.5;
-float topPad = (335 - squareSize * nRows - squarePad * (nRows - 1)) / 2;
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     // Based on http://digitalartmuseum.org/gallery/image/8864.html
     seed = 0;
+    nRows = 6;
+    nCols = 23;
+    squareSize = 35;
+    squarePad = 7;
+    baseOffsetMagnitude = squarePad * 1.5;
+    topPad = (335 - squareSize * nRows - squarePad * (nRows - 1)) / 2;
+    isTweaking = false;
+    originOffsetPower = 0.32;
+    pointOffsetPower = 0.4;
     
     ofColor bg;
     bg.r = 194;
@@ -19,12 +21,17 @@ void ofApp::setup(){
     ofBackground(bg);
     
     // Debug: shows the possible range of outputs.
-//    ofSetBackgroundAuto(false);
+//     ofSetBackgroundAuto(false);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
+}
+
+ofPoint ofApp::generateOffset(float maxAmplitude){
+    float angle = ofRandom(TWO_PI);
+    return ofRandom(maxAmplitude) * ofPoint(cos(angle), sin(angle));
 }
 
 //--------------------------------------------------------------
@@ -36,26 +43,31 @@ void ofApp::draw(){
     crimson.r = 153;
     crimson.g = 47;
     crimson.b = 84;
-    crimson.a = 255 / 2;
+    crimson.a = 255 / 5;
     
     ofColor black(0);
-    black.a = 255 * 7 / 10;
+    black.a = 255 * 2.1 / 5;
+    
+    ofSetLineWidth(2);
     
     for (int y = 0; y < nRows; ++y) {
         for (int x = 0; x < nCols; ++x) {
             for (int color = 0; color < 2; ++color) {  // lol..
                 ofSetColor(color ? black : crimson);
                 
-                int redraws = pow(1 + (nCols - x) / 5 - color, 2);
+                int redraws = pow(1 + (nCols - x) / 5 - color, 2.2);
                 for (int i = 0; i < redraws; ++i) {
+                    float maxOriginOffsetMagnitude = (pow(i + 2, originOffsetPower));
                     int x0 = x * (squareSize + squarePad);
                     int y0 = topPad + y * (squareSize + squarePad);
-                    float offset = baseOffset * (pow(i + 1, 0.24));
+                    ofPoint p0 = ofPoint(x0, y0) + generateOffset(maxOriginOffsetMagnitude);
                     
-                    ofPoint a(x0 + ofRandom(-offset, offset), y0 + ofRandom(-offset, offset));
-                    ofPoint b(x0 + squareSize + ofRandom(-offset, offset), y0 + ofRandom(-offset, offset));
-                    ofPoint c(x0 + squareSize + ofRandom(-offset, offset), y0 + squareSize + ofRandom(-offset, offset));
-                    ofPoint d(x0 + ofRandom(-offset, offset), y0 + squareSize + ofRandom(-offset, offset));
+                    float maxPointOffsetMagnitude = baseOffsetMagnitude * (pow(i + 2, pointOffsetPower));
+                    
+                    ofPoint a = p0 + generateOffset(maxPointOffsetMagnitude);
+                    ofPoint b = p0 + ofPoint(squareSize, 0) + generateOffset(maxPointOffsetMagnitude);
+                    ofPoint c = p0 + ofPoint(squareSize, squareSize) + generateOffset(maxPointOffsetMagnitude);
+                    ofPoint d = p0 + ofPoint(0, squareSize) + generateOffset(maxPointOffsetMagnitude);
                     
                     ofDrawLine(a, b);
                     ofDrawLine(b, c);
@@ -69,17 +81,25 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    seed += 1000;
+    if (key == ' ') {
+        isTweaking = !isTweaking;
+        
+        if (!isTweaking) {
+            cout << originOffsetPower << ", " << pointOffsetPower << endl;
+        }
+    } else seed += 1000;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-    
+    if (isTweaking) {
+        originOffsetPower = x / 300.0;
+        pointOffsetPower = y / 400.0;
+    }
 }
 
 //--------------------------------------------------------------
