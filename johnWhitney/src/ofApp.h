@@ -31,9 +31,8 @@ public:
     int r;
     int kickFlash;
 	
-    int keyChannel;
-    int drumChannel;
-	ofxMidiIn midiIn;
+	ofxMidiIn keyMidiIn;
+    ofxMidiIn drumMidiIn;
 	ofxMidiMessage midiMessage;
     
     Point points[nPoints];

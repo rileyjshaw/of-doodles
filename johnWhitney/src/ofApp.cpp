@@ -3,25 +3,13 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetVerticalSync(true);
-	
-    midiIn.listPorts();
     
-    vector<string> instruments = midiIn.getPortList();
-    
-    for (int i = 0; i < instruments.size(); ++i) {
-        string instrumentName = instruments[i];
-        if (!instrumentName.compare("MPKmini2")) {
-            keyChannel = i;
-            midiIn.openPort(keyChannel);
-        }
-        else if (!instrumentName.compare("UM-ONE")) {
-            drumChannel = i;
-            midiIn.openPort(drumChannel);
-        }
-    }
+    keyMidiIn.openPort("MPKmini2");
+    drumMidiIn.openPort("UM-ONE");
 	
 	// add ofApp as a listener
-	midiIn.addListener(this);
+	keyMidiIn.addListener(this);
+    drumMidiIn.addListener(this);
     
     lastPitch = 20;
     currentPitch = 22;
@@ -63,20 +51,22 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::exit() {
 	// clean up
-	midiIn.closePort();
-	midiIn.removeListener(this);
+	keyMidiIn.closePort();
+    drumMidiIn.closePort();
+	keyMidiIn.removeListener(this);
+    drumMidiIn.removeListener(this);
 }
 
 //--------------------------------------------------------------
 void ofApp::newMidiMessage(ofxMidiMessage& msg) {
 	midiMessage = msg;
 
-    if (msg.status == MIDI_NOTE_ON) {
-        if (msg.channel == keyChannel) {
+    if (msg.status == MIDI_NOTE_ON and msg.velocity) {
+        if (!msg.portName.compare("MPKmini2")) {
             lastPitch = currentPitch;
             currentPitch = msg.pitch;
             volume = ofMap(msg.velocity, 0, 127, 40, 80);
-        } else if (msg.channel == drumChannel) {
+        } else if (!msg.portName.compare("UM-ONE")) {
             kickFlash = 16;
         }
     }
