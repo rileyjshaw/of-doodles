@@ -34,12 +34,26 @@ void setNormals(ofMesh &mesh) {
     mesh.addNormals( norm );
 }
 
+void addTriangle(ofMesh &mesh, ofPoint drawOffset, ofPoint a, ofPoint b, ofPoint c, ofColor color = ofColor(255)) {
+    mesh.addVertex(a - drawOffset);
+    mesh.addTexCoord(a);
+    // mesh.addColor(color);
+    mesh.addVertex(b - drawOffset);
+    mesh.addTexCoord(b);
+    // mesh.addColor(color);
+    mesh.addVertex(c - drawOffset);
+    mesh.addTexCoord(c);
+    // mesh.addColor(color);
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
-//    light.enable();
     int gridSize = 10;
     int sideLength = 50;
     int peakHeight = 40;
+    
+    // light.enable();
+    grabber.setup(640, 480);
     
     ofPoint v0; // Peak.
     ofPoint v1; // Top left.
@@ -54,19 +68,20 @@ void ofApp::setup(){
     
     vector <ofColor> colors = {c1, c2, c3, c4};
     
-    int offset = sideLength * gridSize / 2;
+    int offsetLength = sideLength * gridSize / 2;
+    ofPoint offset = ofPoint(offsetLength, offsetLength);
     
     for (int y = 0; y < gridSize; ++y) {
-        int yTop = y * sideLength - offset;
+        int yTop = y * sideLength;
         int yBottom = yTop + sideLength;
         int yMid = (yTop + yBottom) / 2;
         
-        v4 = ofPoint(-offset, yTop, 0);
-        v3 = ofPoint(-offset, yBottom, 0);
+        v4 = ofPoint(0, yTop, 0);
+        v3 = ofPoint(0, yBottom, 0);
         
         for (int x = 0; x < gridSize; ++x) {
-            int xMid = (x + 0.5) * sideLength - offset;
-            int xRight = (x + 1) * sideLength - offset;
+            int xMid = (x + 0.5) * sideLength;
+            int xRight = (x + 1) * sideLength;
             
             v0 = ofPoint(xMid, yMid, peakHeight);
             v1 = v4;
@@ -80,33 +95,10 @@ void ofApp::setup(){
 //            c3 = colors[rand() % 4];
 //            c4 = colors[rand() % 4];
             
-            mesh.addVertex(v0);
-            mesh.addColor(c1);
-            mesh.addVertex(v1);
-            mesh.addColor(c1);
-            mesh.addVertex(v2);
-            mesh.addColor(c1);
-            
-            mesh.addVertex(v0);
-            mesh.addColor(c2);
-            mesh.addVertex(v2);
-            mesh.addColor(c2);
-            mesh.addVertex(v3);
-            mesh.addColor(c2);
-            
-            mesh.addVertex(v0);
-            mesh.addColor(c3);
-            mesh.addVertex(v3);
-            mesh.addColor(c3);
-            mesh.addVertex(v4);
-            mesh.addColor(c3);
-            
-            mesh.addVertex(v0);
-            mesh.addColor(c4);
-            mesh.addVertex(v4);
-            mesh.addColor(c4);
-            mesh.addVertex(v1);
-            mesh.addColor(c4);
+            addTriangle(mesh, offset, v0, v1, v2);
+            addTriangle(mesh, offset, v0, v2, v3);
+            addTriangle(mesh, offset, v0, v3, v4);
+            addTriangle(mesh, offset, v0, v4, v1);
         }
     }
     
@@ -116,7 +108,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+    grabber.update();
 }
 
 //--------------------------------------------------------------
@@ -128,7 +120,9 @@ void ofApp::draw(){
     float angle = time * 30;
     
     cam.begin();
+    grabber.bind();
     mesh.draw();
+    grabber.unbind();
     cam.end();
     
 //    ofPushMatrix();

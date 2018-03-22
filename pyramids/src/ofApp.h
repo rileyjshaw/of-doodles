@@ -23,6 +23,7 @@ class ofApp : public ofBaseApp{
 		
         ofEasyCam cam;
         ofMesh mesh;
+        ofVideoGrabber grabber;
 //        ofLight light;
 };
 
