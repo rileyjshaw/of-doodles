@@ -36,43 +36,82 @@ void setNormals(ofMesh &mesh) {
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    light.enable();
+//    light.enable();
+    int gridSize = 10;
+    int sideLength = 50;
+    int peakHeight = 40;
     
-    ofPoint v0 = ofPoint(-200, -100, 0);
-    ofPoint v1 = ofPoint(200, -100, 0);
-    ofPoint v2 = ofPoint(0, 200, 0);
-    ofPoint v3 = ofPoint(0, 0, 100);
+    ofPoint v0; // Peak.
+    ofPoint v1; // Top left.
+    ofPoint v2; // Bottom left.
+    ofPoint v3; // Bottom right.
+    ofPoint v4; // Top right.
     
-    mesh.addVertex(v0);
-    mesh.addColor(ofColor(255, 255, 255));
-    mesh.addVertex(v1);
-    mesh.addColor(ofColor(255, 255, 255));
-    mesh.addVertex(v2);
-    mesh.addColor(ofColor(255, 255, 255));
+    ofColor c1 = ofColor(0, 255, 255);
+    ofColor c2 = ofColor(255, 0, 255);
+    ofColor c3 = ofColor(255, 255, 0);
+    ofColor c4 = ofColor(255, 0, 0);
     
-    mesh.addVertex(v0);
-    mesh.addColor(ofColor(255, 0, 0));
-    mesh.addVertex(v1);
-    mesh.addColor(ofColor(255, 0, 0));
-    mesh.addVertex(v3);
-    mesh.addColor(ofColor(255, 0, 0));
+    vector <ofColor> colors = {c1, c2, c3, c4};
     
-    mesh.addVertex(v0);
-    mesh.addColor(ofColor(0, 255, 0));
-    mesh.addVertex(v2);
-    mesh.addColor(ofColor(0, 255, 0));
-    mesh.addVertex(v3);
-    mesh.addColor(ofColor(0, 255, 0));
+    int offset = sideLength * gridSize / 2;
     
-    mesh.addVertex(v1);
-    mesh.addColor(ofColor(0, 0, 255));
-    mesh.addVertex(v2);
-    mesh.addColor(ofColor(0, 0, 255));
-    mesh.addVertex(v3);
-    mesh.addColor(ofColor(0, 0, 255));
+    for (int y = 0; y < gridSize; ++y) {
+        int yTop = y * sideLength - offset;
+        int yBottom = yTop + sideLength;
+        int yMid = (yTop + yBottom) / 2;
+        
+        v4 = ofPoint(-offset, yTop, 0);
+        v3 = ofPoint(-offset, yBottom, 0);
+        
+        for (int x = 0; x < gridSize; ++x) {
+            int xMid = (x + 0.5) * sideLength - offset;
+            int xRight = (x + 1) * sideLength - offset;
+            
+            v0 = ofPoint(xMid, yMid, peakHeight);
+            v1 = v4;
+            v2 = v3;
+            v3 = ofPoint(xRight, yBottom, 0);
+            v4 = ofPoint(xRight, yTop, 0);
+
+//            // Random colors.
+//            c1 = colors[rand() % 4];
+//            c2 = colors[rand() % 4];
+//            c3 = colors[rand() % 4];
+//            c4 = colors[rand() % 4];
+            
+            mesh.addVertex(v0);
+            mesh.addColor(c1);
+            mesh.addVertex(v1);
+            mesh.addColor(c1);
+            mesh.addVertex(v2);
+            mesh.addColor(c1);
+            
+            mesh.addVertex(v0);
+            mesh.addColor(c2);
+            mesh.addVertex(v2);
+            mesh.addColor(c2);
+            mesh.addVertex(v3);
+            mesh.addColor(c2);
+            
+            mesh.addVertex(v0);
+            mesh.addColor(c3);
+            mesh.addVertex(v3);
+            mesh.addColor(c3);
+            mesh.addVertex(v4);
+            mesh.addColor(c3);
+            
+            mesh.addVertex(v0);
+            mesh.addColor(c4);
+            mesh.addVertex(v4);
+            mesh.addColor(c4);
+            mesh.addVertex(v1);
+            mesh.addColor(c4);
+        }
+    }
     
     mesh.setupIndicesAuto();
-    setNormals(mesh);
+//    setNormals(mesh);
 }
 
 //--------------------------------------------------------------
@@ -88,19 +127,15 @@ void ofApp::draw(){
     float time = ofGetElapsedTimef();
     float angle = time * 30;
     
-    ofPushMatrix();
-        ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2, 0 );
-//        ofRotate(angle, 3, 1, 1);
-        ofSetColor(255, 128, 255);
-        mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-//        mesh.drawWireframe();
-        mesh.draw();
+    cam.begin();
+    mesh.draw();
+    cam.end();
     
-        mesh.setMode(OF_PRIMITIVE_POINTS);
-        glPointSize(40);
-        glEnable(GL_POINT_SMOOTH);
-        mesh.draw();
-    ofPopMatrix();
+//    ofPushMatrix();
+////        ofRotate(angle, 3, 1, 1);
+////        mesh.drawWireframe();
+//        mesh.draw();
+//    ofPopMatrix();
 }
 
 //--------------------------------------------------------------

@@ -21,8 +21,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+        ofEasyCam cam;
         ofMesh mesh;
-        ofLight light;
+//        ofLight light;
 };
 
 void setNormals(ofMesh &mesh);
