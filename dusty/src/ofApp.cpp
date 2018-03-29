@@ -1,6 +1,6 @@
 #include "ofApp.h"
 
-#define SPEED 4
+#define SPEED 1
 #define RESET_FRAME 60
 #define FIRST_FRAME 40
 
@@ -68,41 +68,34 @@ void ofApp::draw(){
             if (y + SPEED >= camHeight) {
                 continue;
             }
-
+            
             ofColor oldColor = oldPixels.getColor(x, y);
-
-            if (oldColor.getBrightness() < 127) {
-                int drop = 0;
-                int shift = 0;
-                while (
-                       y + drop < camHeight and
-                       drop < SPEED and
-                       camPixels.getColor(x, y + drop + 1).getBrightness() >= 127 and
-                       newPixels.getColor(x, y + drop + 1).a == 0) {
-                    ++drop;
-                }
-                if (drop == 0) {
-                    if (ofRandom(1000) > 999) shift = (rand() % 2) * 2 - 1;
-                }
-                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
-                    newPixels.setColor(x + shift, y + drop, oldColor);
-                }
-            } else {
-                int drop = 0;
-                int shift = 0;
-                while (
-                       y + drop < camHeight and
-                       drop < SPEED and
-                       camPixels.getColor(x, y + drop + 1).getBrightness() > 127 and
-                       newPixels.getColor(x, y + drop + 1).a == 0) {
-                    ++drop;
-                }
-                if (drop == 0) {
-                    if (ofRandom(1000) > 999) shift = (rand() % 2) * 2 - 1;
-                }
-                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
-                    newPixels.setColor(x + shift, y + drop, oldColor);
-                }
+            if (oldColor.a == 0) continue;
+            
+            int oldBrightness = oldColor.getBrightness();
+            int drop = 0;
+            int shift = 0;
+            while (
+                   y + drop < camHeight and
+                   drop < SPEED and
+                   abs(camPixels.getColor(x, y + drop + 1).getBrightness() - oldBrightness) > 10 and
+                   newPixels.getColor(x, y + drop + 1).a == 0) {
+                ++drop;
+            }
+            if (drop == 0) {
+                if (ofRandom(20) > 19) shift = (rand() % 2) * 2 - 1;
+                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and newPixels.getColor(x + shift, y).a != 0) shift = 0;
+            }
+            if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
+                newPixels.setColor(x + shift, y + drop, oldColor);
+            }
+        }
+    }
+    
+    for (int y = 0; y < camHeight; ++y) {
+        for (int x = 0; x < camWidth; ++x) {
+            if (ofRandom(10) > 9 and newPixels.getColor(x, y).a == 0) {
+                newPixels.setColor(x, y, camPixels.getColor(x, y));
             }
         }
     }
