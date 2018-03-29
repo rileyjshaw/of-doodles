@@ -1,14 +1,20 @@
 #include "ofApp.h"
 
-#define SPEED 10
-#define RESET_FRAME 50
-//
-//void clearPixels(ofPixels px){
-//    int numPixels = px.size() / px.getNumChannels();
-//    for (int i = 0; i < numPixels; ++i) {
-//
-//    }
-//}
+#define SPEED 4
+#define RESET_FRAME 60
+#define FIRST_FRAME 40
+
+void ofApp::clearPixels(ofPixels &px) {
+    px.clear();
+    px.allocate(camWidth, camHeight, OF_PIXELS_RGBA);
+    ofColor transparent = ofColor(255, 255, 255);
+    transparent.a = 0;
+    for (int y = 0; y < camHeight; ++y) {
+        for (int x = 0; x < camWidth; ++x) {
+            px.setColor(x, y, transparent);
+        }
+    }
+}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -16,11 +22,13 @@ void ofApp::setup(){
     screenHeight = ofGetHeight();
     grabber.setPixelFormat(OF_PIXELS_RGBA);
     grabber.setup(screenWidth / 2, screenHeight / 2);
-    camWidth = grabber.getWidth();
-    camHeight = grabber.getHeight();
+    screenWidth = camWidth = grabber.getWidth();
+    screenHeight = camHeight = grabber.getHeight();
+    
+    ofSetWindowShape(screenWidth, screenHeight);
 
-    ping.allocate(camWidth, camHeight, OF_PIXELS_RGBA);
-    pong.allocate(camWidth, camHeight, OF_PIXELS_RGBA);
+    clearPixels(ping);
+    clearPixels(pong);
 }
 
 //--------------------------------------------------------------
@@ -31,11 +39,11 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     int frameNum = ofGetFrameNum();
-    if (frameNum < RESET_FRAME) return;
+    if (frameNum < FIRST_FRAME) return;
     
     ofPixels camPixels = grabber.getPixels();
     camPixels.mirror(false, true);
-    ofImage(camPixels).draw(0, 0);
+    ofImage(camPixels).draw(0, 0, screenWidth, screenHeight);
     
     ofPixels oldPixels;
     ofPixels newPixels;
@@ -48,30 +56,64 @@ void ofApp::draw(){
     }
 
     // TODO(riley): Keep old dust?
-    if (frameNum % RESET_FRAME == 0) {
+    if ((frameNum - FIRST_FRAME) == 0 || rego) {
+        clearPixels(oldPixels);
         ping = oldPixels = ofPixels(camPixels);
+        rego = false;
     }
-
-    newPixels.clear();
-    newPixels.allocate(camWidth, camHeight, OF_PIXELS_RGBA);
-    for (int y = 0; y < camHeight - SPEED; ++y) {
+    
+    clearPixels(newPixels);
+    for (int y = camHeight - 1; y >= 0; --y) {
         for (int x = 0; x < camWidth; ++x) {
+            if (y + SPEED >= camHeight) {
+                continue;
+            }
+
             ofColor oldColor = oldPixels.getColor(x, y);
 
-            // Dark pixels fall away.
-//            if (oldColor.getBrightness() < 127) {
-                newPixels.setColor(x, y + SPEED, oldColor);
-//            } else {
-//                int drop = 0;
-//                while (drop < SPEED and camPixels.getColor(x, y + drop + 1).getBrightness() > 127) {
-//                    ++drop;
-//                }
-//                newPixels.setColor(x, y + drop, oldColor);
-//            }
+            if (oldColor.getBrightness() < 127) {
+                int drop = 0;
+                int shift = 0;
+                while (
+                       y + drop < camHeight and
+                       drop < SPEED and
+                       camPixels.getColor(x, y + drop + 1).getBrightness() >= 127 and
+                       newPixels.getColor(x, y + drop + 1).a == 0) {
+                    ++drop;
+                }
+                if (drop == 0) {
+                    if (ofRandom(1000) > 999) shift = (rand() % 2) * 2 - 1;
+                }
+                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
+                    newPixels.setColor(x + shift, y + drop, oldColor);
+                }
+            } else {
+                int drop = 0;
+                int shift = 0;
+                while (
+                       y + drop < camHeight and
+                       drop < SPEED and
+                       camPixels.getColor(x, y + drop + 1).getBrightness() > 127 and
+                       newPixels.getColor(x, y + drop + 1).a == 0) {
+                    ++drop;
+                }
+                if (drop == 0) {
+                    if (ofRandom(1000) > 999) shift = (rand() % 2) * 2 - 1;
+                }
+                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
+                    newPixels.setColor(x + shift, y + drop, oldColor);
+                }
+            }
         }
     }
     
-    ofImage(newPixels).draw(0, 0, camWidth, camHeight);
+    if (frameNum % 2 == 0) {
+        pong = newPixels;
+    } else {
+        ping = newPixels;
+    }
+    
+    ofImage(newPixels).draw(0, 0, screenWidth, screenHeight);
 }
 
 //--------------------------------------------------------------
@@ -101,7 +143,7 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    
+    rego = true;
 }
 
 //--------------------------------------------------------------

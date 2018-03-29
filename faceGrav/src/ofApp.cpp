@@ -70,7 +70,9 @@ void ofApp::draw(){
         path.close();
         ofSeedRandom(10000 + y);
         ofRandom(255);  // First one is always zero?
-        path.setFillColor(ofColor(floor(ofRandom(255)), floor(ofRandom(255)), floor(ofRandom(255))));
+        path.setStrokeWidth(2);
+        path.setStrokeColor(ofColor(y % 2 ? 255 : 0));
+//        path.setFillColor(ofColor(floor(ofRandom(255)), floor(ofRandom(255)), floor(ofRandom(255))));
         path.setFillColor(ofColor(y % 2 ? 0 : 255));
         path.draw();
     }

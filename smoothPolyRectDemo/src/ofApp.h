@@ -5,8 +5,7 @@
 class ofApp : public ofBaseApp{
 
 	public:
-        void clearPixels(ofPixels &px);
-        void setup();
+		void setup();
 		void update();
 		void draw();
 
@@ -21,13 +20,5 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-    
-        ofVideoGrabber grabber;
-        int screenWidth;
-        int screenHeight;
-        int camWidth;
-        int camHeight;
-        ofPixels ping;
-        ofPixels pong;
-        bool rego;
+		
 };
