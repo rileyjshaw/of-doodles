@@ -24,6 +24,8 @@ class ofApp : public ofBaseApp{
         ofVideoGrabber grabber;
         float screenWidth;
         float screenHeight;
-        float camWidth;
-        float camHeight;
+        int mosaicWidth;
+        int mosaicHeight;
+        int sliceWidth;
+        int sliceHeight;
 };
