@@ -1,18 +1,18 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
-    lineWidth = 4;
+void ofApp::setup() {
+    lineWidth = FANCY ? 4 : 1;
     baseValue = 255 / lineWidth;
     screenWidth = static_cast< float >(ofGetWidth());
     screenHeight = static_cast< float >(ofGetHeight());
-    //    grabber.setPixelFormat(OF_PIXELS_GRAY);  // Linux optimization.
+    if (!FANCY) grabber.setPixelFormat(OF_PIXELS_GRAY);  // Linux optimization.
     grabber.setup(screenWidth, screenHeight);
     
     ofBackground(0);
     ofSetColor(255);
     ofSetLineWidth(lineWidth);
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    if (FANCY) ofEnableBlendMode(OF_BLENDMODE_ADD);
 }
 
 //--------------------------------------------------------------
@@ -23,7 +23,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofPixels camPixels = grabber.getPixels();
-    //    camPixels.setImageType(OF_IMAGE_GRAYSCALE);
+    if (!FANCY) camPixels.setImageType(OF_IMAGE_GRAYSCALE);
     camPixels.resize(screenWidth / 5, screenHeight / 5);
     camPixels.mirror(false, true);
     
@@ -34,29 +34,36 @@ void ofApp::draw(){
     float channelOffset = yScale / 3;
     
     for (int y = 0; y < h; ++y) {
-        //        ofPolyline row = ofPolyline();
-        ofPolyline r = ofPolyline();
-        ofPolyline g = ofPolyline();
-        ofPolyline b = ofPolyline();
+        ofPolyline row, r, g, b;
+        if (FANCY) {
+            r = ofPolyline();
+            g = ofPolyline();
+            b = ofPolyline();
+        } else row = ofPolyline();
+        
         for (int x = 0; x < w; ++x) {
-            //            float yOffset = ofMap(camPixels.getColor(x, y).getLightness(), 0, 255, -14, 14);
-            float rOffset = ofMap(camPixels.getColor(x, y).r, 0, 255, -14, 14) - channelOffset;
-            float gOffset = ofMap(camPixels.getColor(x, y).g, 0, 255, -14, 14);
-            float bOffset = ofMap(camPixels.getColor(x, y).b, 0, 255, -14, 14) + channelOffset;
-            //            row.addVertex(x * xScale, y * yScale + yOffset);
-            r.addVertex(x * xScale, y * yScale + rOffset);
-            g.addVertex(x * xScale, y * yScale + gOffset);
-            b.addVertex(x * xScale, y * yScale + bOffset);
+            float yOffset, rOffset, gOffset, bOffset;
+            if (FANCY) {
+                rOffset = ofMap(camPixels.getColor(x, y).r, 0, 255, -14, 14) - channelOffset;
+                gOffset = ofMap(camPixels.getColor(x, y).g, 0, 255, -14, 14);
+                bOffset = ofMap(camPixels.getColor(x, y).b, 0, 255, -14, 14) + channelOffset;
+                r.addVertex(x * xScale, y * yScale + rOffset);
+                g.addVertex(x * xScale, y * yScale + gOffset);
+                b.addVertex(x * xScale, y * yScale + bOffset);
+            } else {
+                yOffset = ofMap(camPixels.getColor(x, y).getLightness(), 0, 255, -14, 14);
+                row.addVertex(x * xScale, y * yScale + yOffset);
+            }
         }
-        ofSetColor(baseValue, 0, 0);
-        r.draw();
-        ofSetColor(0, baseValue, 0);
-        g.draw();
-        ofSetColor(0, 0, baseValue);
-        b.draw();
+        if (FANCY) {
+            ofSetColor(baseValue, 0, 0);
+            r.draw();
+            ofSetColor(0, baseValue, 0);
+            g.draw();
+            ofSetColor(0, 0, baseValue);
+            b.draw();
+        } else row.draw();
     }
-    
-    //    ofImage(camPixels).draw(0, 0, screenWidth, screenHeight);
 }
 
 //--------------------------------------------------------------
@@ -113,3 +120,4 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){
     
 }
+

@@ -26,4 +26,5 @@ class ofApp : public ofBaseApp{
         float screenHeight;
         int lineWidth;
         int baseValue;
+        const bool FANCY = true;
 };
