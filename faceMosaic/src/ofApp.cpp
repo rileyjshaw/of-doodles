@@ -35,47 +35,46 @@ void ofApp::draw(){
     // to replace them with the current img.
     // TODO(riley): Could be array[9]s...
     vector<ofImage> slices;
-    vector<int> brightnesses;
-    vector<ofImage> brightnessToSlice;
-    brightnessToSlice.resize(256);
+    vector<ofColor> sliceColors;
 
     for (int y = 0; y < 3; ++y) {
         for (int x = 0; x < 3; ++x) {
             ofPixels slice = ofPixels(camPixels);
             slice.crop(x * mosaicWidth / 4, y * mosaicHeight / 4, sliceWidth, sliceHeight);
 
-            int brightness = 0;
+            int nPx = sliceHeight * sliceWidth;
+            int r = 0;
+            int g = 0;
+            int b = 0;
             for (int pxY = 0; pxY < sliceHeight; pxY++) {
                 for (int pxX = 0; pxX < sliceWidth; pxX++) {
-                    brightness += slice.getColor(pxX, pxY).getBrightness();
+                    ofColor color = slice.getColor(pxX, pxY);
+                    r += color.r;
+                    g += color.g;
+                    b += color.b;
                 }
             }
 
-            ofImage img = ofImage(slice);
-            brightnesses.push_back(brightness / sliceHeight / sliceWidth);
-            slices.push_back(img);
-        }
-    }
-
-    for (int brightness = 0; brightness < 256; ++brightness) {
-        int record = 256;
-
-        for (int i = 0; i < brightnesses.size(); i++) {
-            int diff = abs(brightness - brightnesses[i]);
-
-            if (diff < record) {
-                record = diff;
-                ofImage slice = slices[i];
-                brightnessToSlice[brightness] = slice;
-            }
+            sliceColors.push_back(ofColor(r / nPx, g / nPx, b / nPx));
+            slices.push_back(ofImage(slice));
         }
     }
 
     for (int y = 0; y < mosaicHeight; ++y) {
         for (int x = 0; x < mosaicWidth; ++x) {
-            int brightness = camPixels.getColor(x, y).getBrightness();
-            ofImage slice = brightnessToSlice[brightness];
-            slice.draw(x * sliceWidth, y * sliceHeight);
+            ofColor camColor = camPixels.getColor(x, y);
+            
+            int record = 256 * 3;
+            int winner;
+            for (int i = 0; i < sliceColors.size(); ++i) {
+                ofColor sliceColor = sliceColors[i];
+                int distance = abs(camColor.r - sliceColor.r) + abs(camColor.g - sliceColor.g) + abs(camColor.b - sliceColor.b);
+                if (distance < record) {
+                    record = distance;
+                    winner = i;
+                }
+                slices[winner].draw(x * sliceWidth, y * sliceHeight);
+            }
         }
     }
 }
