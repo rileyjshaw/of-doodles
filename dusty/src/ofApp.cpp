@@ -78,13 +78,13 @@ void ofApp::draw(){
             while (
                    y + drop < camHeight and
                    drop < SPEED and
-                   abs(camPixels.getColor(x, y + drop + 1).getBrightness() - oldBrightness) > 10 and
+                   abs(camPixels.getColor(x, y + drop + 1).getBrightness() - oldBrightness) > 20 and
                    newPixels.getColor(x, y + drop + 1).a == 0) {
                 ++drop;
             }
             if (drop == 0) {
-                if (ofRandom(20) > 19) shift = (rand() % 2) * 2 - 1;
-                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and newPixels.getColor(x + shift, y).a != 0) shift = 0;
+//                if (ofRandom(20) > 19) shift = (rand() % 2) * 2 - 1;
+//                if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and newPixels.getColor(x + shift, y).a != 0) shift = 0;
             }
             if (x + shift == ofClamp(x + shift, 0, camWidth - 1) and y + drop == ofClamp(y + drop, 0, camWidth - 1)) {
                 newPixels.setColor(x + shift, y + drop, oldColor);
