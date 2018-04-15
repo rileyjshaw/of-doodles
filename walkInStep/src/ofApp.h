@@ -1,6 +1,12 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGif.h"
+
+struct Butterfly {
+    ofPoint position;
+    int age;
+};
 
 class ofApp : public ofBaseApp{
 
@@ -21,10 +27,16 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-        ofTrueTypeFont font;
+        ofxGIF::fiGifLoader gifloader;
+        int gifFrames;
+        float gifWidth;
+        float gifHeight;
+        ofPoint gifOffset;
+    
         ofEasyCam cam;
-        ofMesh mesh;
-        ofVideoGrabber grabber;    
+    
+        ofPoint frames[30][24];         // 30 frames, 24 points per frame
+        ofPoint frames2d[30][24];         // 30 frames, 24 points per frame
+    
+        deque <Butterfly> butterflies;
 };
-
-void setNormals(ofMesh &mesh);

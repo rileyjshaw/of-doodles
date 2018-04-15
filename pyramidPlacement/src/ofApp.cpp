@@ -58,7 +58,6 @@ void ofApp::setup(){
     int peakHeight = 40;
     
     // light.enable();
-    grabber.setup(640, 480);
     
     ofPoint v0; // Peak.
     ofPoint v1; // Top left.
@@ -94,11 +93,11 @@ void ofApp::setup(){
             v3 = ofPoint(xRight, yBottom, 0);
             v4 = ofPoint(xRight, yTop, 0);
 
-//            // Random colors.
-//            c1 = colors[rand() % 4];
-//            c2 = colors[rand() % 4];
-//            c3 = colors[rand() % 4];
-//            c4 = colors[rand() % 4];
+            // Random colors.
+            c1 = colors[rand() % 4];
+            c2 = colors[rand() % 4];
+            c3 = colors[rand() % 4];
+            c4 = colors[rand() % 4];
             
             addTriangle(mesh, offset, v0, v1, v2);
             addTriangle(mesh, offset, v0, v2, v3);
@@ -113,7 +112,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    grabber.update();
+
 }
 
 //--------------------------------------------------------------
@@ -125,9 +124,7 @@ void ofApp::draw(){
     float angle = time * 30;
     
     cam.begin();
-    grabber.bind();
     mesh.draw();
-    grabber.unbind();
     cam.end();
     
     // See walkFlutterby for what to do next.

@@ -24,7 +24,6 @@ class ofApp : public ofBaseApp{
         ofTrueTypeFont font;
         ofEasyCam cam;
         ofMesh mesh;
-        ofVideoGrabber grabber;    
 };
 
 void setNormals(ofMesh &mesh);
