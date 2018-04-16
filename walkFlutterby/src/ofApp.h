@@ -4,6 +4,7 @@
 #include "ofxGif.h"
 
 struct Butterfly {
+    float radius;
     ofPoint velocity;
     ofPoint position;
     int age;

@@ -1,7 +1,7 @@
 #include "ofApp.h"
 #include "data.h"
 
-int MAX_AGE = 400;
+int MAX_AGE = 300;
 ofPoint data3d[24];
 
 //--------------------------------------------------------------
@@ -45,12 +45,14 @@ void ofApp::update(){
     
     
     // end do not touch
-    
-    for (int i = 0; i < 24; ++i){
-        if (ofRandom(1) > 0.9) {
+    for (int i = 0; i < 24; ++i) {
+        bool leftFoot = (frameNumber > 13 && frameNumber < 19) && (i == 18 || i == 19);
+        bool rightFoot = frameNumber > 24 && (i == 22 || i == 23);
+        if ((leftFoot || rightFoot) && ofRandom(1) > 0.85) {
             struct Butterfly butterfly;
-            butterfly.position = ofPoint(data3d[i].x, data3d[i].y, data3d[i].z - 50);
-            butterfly.velocity = ofPoint(ofRandom(-1, 1), ofRandom(6), ofRandom(-3, -1)).normalize();
+            butterfly.radius = ofRandom(3, 5);
+            butterfly.position = ofPoint(data3d[i].x, data3d[i].y, data3d[i].z);
+            butterfly.velocity = ofPoint(ofRandom(-1, 1), ofRandom(5), ofRandom(-3, -1)).normalize() * 2;
             butterfly.age = 0;
             butterflies.push_back(butterfly);
         }
@@ -59,26 +61,39 @@ void ofApp::update(){
     int numDead = 0;
     for (int i = 0; i < butterflies.size(); ++i) {
         struct Butterfly* butterfly = &butterflies[i];
-        int newAge = ++butterfly->age;
-        if (newAge > MAX_AGE) {
+        int age = butterfly->age;
+        if (age > MAX_AGE) {
             ++numDead;
-        } else {
+        } else if (age) {
             butterfly->position.y += butterfly->velocity.y + ofRandom(-0.5, 0.5);
             butterfly->position.x += butterfly->velocity.x + ofRandom(-0.5, 0.5);
-            butterfly->position.z += butterfly->velocity.z + ofRandom(-0.5, 0.5);
+            butterfly->position.z += butterfly->velocity.z - 2 + ofRandom(-0.5, 0.5);
         }
+        ++butterfly->age;
     }
     
     // Probably a way to delete all at once.
     for (int i = 0; i < numDead; ++i) { butterflies.pop_front(); }
 }
 
+ofColor bgColor = ofColor(74, 90, 74);
+float y = 0;
 //--------------------------------------------------------------
 void ofApp::draw(){
+//    int frameNumber = (int)(ofGetFrameNum()*0.4) % 30;
+//    if (frameNumber == 15 || frameNumber == 26) {
+//        y += 2;
+//    } else if (frameNumber == 16 || frameNumber == 27) {
+//        y -= 0.7;
+//    } else {
+//        y -= 0.1;
+//    }
+    
     //----------------------------- 3d
     float angle = fmod(ofGetElapsedTimef() / 2.0, 2 * PI);
-    cam.setGlobalPosition(sin(angle) * 600.0, ofGetElapsedTimef(), cos(angle) * 600.0);
-    cam.setTarget(ofPoint(0, 0, 0));
+    cam.setGlobalPosition(sin(angle) * 400.0, (sin(angle - 1) + 0.5) * 250.0, cos(angle) * 400.0 - 200);
+    cam.setTarget(ofPoint(0, (sin(angle - 1) - 1) * 60.0, 0));
+//    cam.enableOrtho();
     cam.begin();
     ofSetDepthTest(true);
     ofSetColor(255);
@@ -163,15 +178,22 @@ void ofApp::draw(){
     body.addVertex(data3d[5]);
     body.draw();
     
-    ofSetRectMode(OF_RECTMODE_CENTER);
+//    ofSetRectMode(OF_RECTMODE_CENTER);
     
     for (int i = 0; i < butterflies.size(); ++i) {
-        // Butterflies fade in *and* out, with max opacity at MAX_AGE / 2.
-        float opacity = 1.0 - (float)abs(2 * butterflies[i].age - MAX_AGE) / MAX_AGE;
-        ofSetColor(ofColor(255, 255, 255, opacity * 255));
+//        // Butterflies fade in *and* out, with max opacity at MAX_AGE / 2"
+//        float opacity = 1.0 - (float)abs(2 * butterflies[i].age - MAX_AGE) / MAX_AGE;
+        
+        // Butterflies just fade out:
+        float opacity = 1.0 - (float)butterflies[i].age / MAX_AGE;
+        
+        // Fade faster...
+        opacity *= opacity;
+        
+        ofSetColor(bgColor, opacity * 255);
         ofPushMatrix();
         ofTranslate(butterflies[i].position);
-        ofDrawSphere(0, 0, 0, 4);
+        ofDrawSphere(0, 0, 0, butterflies[i].radius);
 //        ofMatrix4x4 mat;
 //        mat.makeLookAtMatrix(butterflies[i].position, cam.getPosition(), ofPoint(0, 1, 0));
 //        ofMultMatrix(mat);
@@ -180,28 +202,29 @@ void ofApp::draw(){
         ofPopMatrix();
     }
 
-    ofSetRectMode(OF_RECTMODE_CORNER);
+//    ofSetRectMode(OF_RECTMODE_CORNER);
     cam.end();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+//    if (key == ' ') cout << bgColor << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
+//    bgColor.setHue(x * 255 / ofGetScreenWidth());
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+//    bgColor.setSaturation(x * 255 / ofGetScreenWidth());
+//    bgColor.setBrightness(y * 255 / ofGetScreenHeight());
 }
 
 //--------------------------------------------------------------
