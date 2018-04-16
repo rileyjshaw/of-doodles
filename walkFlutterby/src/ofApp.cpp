@@ -47,13 +47,10 @@ void ofApp::update(){
     // end do not touch
     
     for (int i = 0; i < 24; ++i){
-        float x = data3d[i].x;
-        float y = data3d[i].y;
-        float z = data3d[i].z;
-        
-        if (ofRandom(1) > 0.98) {
+        if (ofRandom(1) > 0.9) {
             struct Butterfly butterfly;
-            butterfly.position = ofPoint(x, y, z);
+            butterfly.position = ofPoint(data3d[i].x, data3d[i].y, data3d[i].z - 50);
+            butterfly.velocity = ofPoint(ofRandom(-1, 1), ofRandom(6), ofRandom(-3, -1)).normalize();
             butterfly.age = 0;
             butterflies.push_back(butterfly);
         }
@@ -66,9 +63,9 @@ void ofApp::update(){
         if (newAge > MAX_AGE) {
             ++numDead;
         } else {
-            butterfly->position.y += ofRandom(2) * ofRandom(1);
-            butterfly->position.x += ofRandom(-1, 1) * ofRandom(1);
-            --butterfly->position.z;
+            butterfly->position.y += butterfly->velocity.y + ofRandom(-0.5, 0.5);
+            butterfly->position.x += butterfly->velocity.x + ofRandom(-0.5, 0.5);
+            butterfly->position.z += butterfly->velocity.z + ofRandom(-0.5, 0.5);
         }
     }
     
@@ -78,16 +75,12 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
-    
-    // projection example:
-    vector < ofPoint > twoDPoitns;
-    
-//    //----------------------------- 3d
+    //----------------------------- 3d
+    float angle = fmod(ofGetElapsedTimef() / 2.0, 2 * PI);
+    cam.setGlobalPosition(sin(angle) * 600.0, ofGetElapsedTimef(), cos(angle) * 600.0);
+    cam.setTarget(ofPoint(0, 0, 0));
     cam.begin();
-    cam.enableOrtho();
     ofSetDepthTest(true);
-    ofRotateY(ofGetElapsedTimef() * 1000 / 30);
     ofSetColor(255);
     
     // Torso.
@@ -158,64 +151,37 @@ void ofApp::draw(){
     body.addVertex(data3d[4]);
     body.draw();
     
-// ,   // Bicep.
-//    body.addVertex(data3d[13]);
-//    body.addVertex(data3d[3]);
-//    body.addVertex(data3d[12]);
-//    body.draw();
-//    
-//    // Bicep.
-//    body.addVertex(data3d[3]);
-//    body.addVertex(data3d[4]);
-//    body.addVertex(data3d[5]);
-//    body.draw();
+    // Bicep.
+    body.addVertex(data3d[13]);
+    body.addVertex(data3d[3]);
+    body.addVertex(data3d[12]);
+    body.draw();
+    
+    // Bicep.
+    body.addVertex(data3d[3]);
+    body.addVertex(data3d[4]);
+    body.addVertex(data3d[5]);
+    body.draw();
     
     ofSetRectMode(OF_RECTMODE_CENTER);
     
-    
-    twoDPoitns.clear();
-   // ofSeedRandom(0);
     for (int i = 0; i < butterflies.size(); ++i) {
-        ofSetColor((1 - (float) butterflies[i].age / MAX_AGE) * 255);
-        
-        ofDrawSphere(butterflies[i].position, 2);
-//        ofPushMatrix();
-//        ofTranslate(butterflies[i].position);
-//        ofDrawBox(0,0,0,20,2,8);
-//        ofPopMatrix();
-        
+        // Butterflies fade in *and* out, with max opacity at MAX_AGE / 2.
+        float opacity = 1.0 - (float)abs(2 * butterflies[i].age - MAX_AGE) / MAX_AGE;
+        ofSetColor(ofColor(255, 255, 255, opacity * 255));
         ofPushMatrix();
+        ofTranslate(butterflies[i].position);
+        ofDrawSphere(0, 0, 0, 4);
+//        ofMatrix4x4 mat;
+//        mat.makeLookAtMatrix(butterflies[i].position, cam.getPosition(), ofPoint(0, 1, 0));
+//        ofMultMatrix(mat);
         
-        ofMatrix4x4 mat;
-        mat.makeLookAtMatrix(butterflies[i].position, cam.getPosition(), ofPoint(0,1,0));
-        
-        ofMultMatrix(mat);
-        //ofTranslate(butterflies[i].position);
-        //ofDrawBox(0,0,0,20,2,8);
-//        ofFill();
-//        ofSetColor(100);
-//        ofRect(0,0,20,20);
-        
-        //gifloader.pages[(butterflies[i].age / 4) % gifFrames].draw(0,0, gifWidth*5, gifHeight*5);
+//        gifloader.pages[(butterflies[i].age / 4) % gifFrames].draw(0, 0, gifWidth, gifHeight);
         ofPopMatrix();
-        
-        
-        
-//        ofPoint pos = cam.worldToScreen(butterflies[i].position);
-        //cout << pos << endl;
-//        twoDPoitns.push_back(pos);
-//
     }
-    
-    ofSetRectMode(OF_RECTMODE_CORNER);
-    
 
+    ofSetRectMode(OF_RECTMODE_CORNER);
     cam.end();
-//
-//    ofNoFill();
-//    for (int i = 0; i < twoDPoitns.size(); i++){
-//        ofCircle(twoDPoitns[i], 30);
-//    }
 }
 
 //--------------------------------------------------------------
